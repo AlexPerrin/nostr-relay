@@ -8,7 +8,18 @@
 
 ### [NIPs - Nostr Implementation Possibilities](https://github.com/nostr-protocol/nips)
 
-- [ ] [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md) Basic protocol flow description
+- [x] [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md) Basic protocol flow description
+- [ ] [NIP-02](https://github.com/nostr-protocol/nips/blob/master/02.md) Follow List
+- [ ] [NIP-04](https://github.com/nostr-protocol/nips/blob/master/04.md) Encrypted Direct Message
+- [ ] [NIP-09](https://github.com/nostr-protocol/nips/blob/master/09.md) Event Deletion Request
+- [ ] [NIP-10](https://github.com/nostr-protocol/nips/blob/master/10.md) Text Notes and Threads
+- [ ] [NIP-11](https://github.com/nostr-protocol/nips/blob/master/11.md) Relay Information Document
+- [ ] [NIP-14](https://github.com/nostr-protocol/nips/blob/master/14.md) Subject tag in Text events
+
+### Next Steps
+
+- Interactive CLI client for testing.
+- Continue implementing additional NIPs.
 
 ### Goals & Motivations
 
