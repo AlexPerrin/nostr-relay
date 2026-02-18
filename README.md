@@ -18,7 +18,6 @@
 
 ### Next Steps
 
-- Interactive CLI client for testing.
 - Persistent event store database (PostgreSQL)
 - Continue implementing additional NIPs.
 
@@ -28,6 +27,95 @@
 - Improve backend development skills with Go.
 - Build an understanding of the Nostr protocol.
 - Exploring ideas for developing a social empathy network.
+
+## CLI Client
+
+`nostr-cli` is an interactive terminal UI for generating keys, publishing events, and watching the feed on any NIP-01 relay. It is built with [Bubble Tea](https://github.com/charmbracelet/bubbletea).
+
+### Build
+
+```sh
+go build -o nostr-cli ./cmd/nostr-cli
+```
+
+### Run
+
+```sh
+./nostr-cli
+```
+
+### Screens
+
+Navigate between screens with `1`, `2`, `3`. Quit with `q`.
+
+#### `[1] Profile`
+
+Configure your identity and relay endpoint.
+
+| Key | Action |
+|-----|--------|
+| `g` | Generate a new secp256k1 keypair |
+| `e` | Enter edit mode (relay URL + private key fields) |
+| `Tab` | Move between fields |
+| `Enter` | Save (derives and displays the public key) |
+| `Esc` | Cancel editing |
+
+After pressing `g`, the full private key hex is displayed on screen — copy and store it somewhere safe before navigating away.
+
+To import an existing key, press `e`, tab to the *Private Key* field, paste your 64-char hex private key, and press `Enter`.
+
+**Example — generate a key and set a custom relay:**
+
+```
+[1] Profile screen
+
+  Relay URL
+  > ws://localhost:9090
+
+  Private Key (hex)
+  > ••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
+
+  ⚠  Back up your private key — it cannot be recovered:
+  9a44527cc452c7a0a5fb597b3dc26d8c87c5c3cab070b9af3e3398923529bc55
+
+  Public Key
+  4f9a1c2d8e3b7a0f5c6d2e1a8b4f3c7d9e2a1b5f8c4d6e3a7b2f1c9d5e8a3b6
+
+  key generated ✓
+```
+
+#### `[2] Feed`
+
+Connects to the relay on first visit and streams kind:1 (text note) events in a scrollable viewport.
+
+| Key | Action |
+|-----|--------|
+| `↑` / `↓` | Scroll through events |
+| `r` | Reconnect (useful after changing the relay in Profile) |
+
+Stored events load immediately on connection; a dotted divider marks the boundary where live events begin.
+
+#### `[3] Post`
+
+Compose and publish a kind:1 text note. Requires a key to be set in Profile first.
+
+| Key | Action |
+|-----|--------|
+| `i` | Focus the text area and start writing |
+| `ctrl+s` | Sign and publish the event |
+| `Esc` | Unfocus the text area |
+
+### Testing the client
+
+Unit tests (no relay required) cover key generation, key parsing, event ID computation, and Schnorr signing. Integration tests require the relay to be running at `ws://localhost:9090/` and are skipped automatically if it is not reachable.
+
+```sh
+# Unit tests only
+go test ./cmd/nostr-cli/ -run 'TestGenerateKey|TestParsePrivKey|TestSignEvent'
+
+# All tests (relay must be running)
+go test ./cmd/nostr-cli/ -v
+```
 
 ## Prerequisites
 
@@ -266,6 +354,8 @@ func main() {
 
 ## Project Structure
 
+### Relay (`/`)
+
 | File | Description |
 |------|-------------|
 | `event.go` | Event type, serialization, ID computation, BIP-340 Schnorr signing/verification, kind classification |
@@ -277,6 +367,19 @@ func main() {
 | `main.go` | Entry point, starts the relay on `:9090`, optional Kafka setup |
 | `nostr_test.go` | Unit and integration tests |
 | `kafka_test.go` | Kafka configuration and integration tests |
+
+### CLI client (`cmd/nostr-cli/`)
+
+| File | Description |
+|------|-------------|
+| `main.go` | Entry point, starts the Bubble Tea program |
+| `model.go` | Root model, tab routing, shared message types and styles |
+| `profile.go` | Profile screen — key generation, key import, relay URL |
+| `feed.go` | Feed screen — live event subscription and scrollable viewport |
+| `post.go` | Post screen — event composition and publishing |
+| `event.go` | Event and Filter types, Schnorr signing (CLI-local copy) |
+| `client.go` | WebSocket client (CLI-local copy) |
+| `client_test.go` | Unit and integration tests for keygen, signing, and relay comms |
 
 ## NIP-01 Protocol Summary
 
