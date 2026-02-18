@@ -19,11 +19,13 @@
 ### Next Steps
 
 - Interactive CLI client for testing.
+- Persistent event store database (PostgreSQL)
 - Continue implementing additional NIPs.
 
 ### Goals & Motivations
 
 - Implement a Nostr relay in Go.
+- Improve backend development skills with Go.
 - Build an understanding of the Nostr protocol.
 - Exploring ideas for developing a social empathy network.
 
