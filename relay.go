@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 // Relay is a NIP-01 compliant Nostr relay.
 type Relay struct {
 	store    *EventStore
+	kafka    *KafkaBus
 	upgrader websocket.Upgrader
 	mu       sync.RWMutex
 	conns    map[*Connection]struct{}
@@ -135,6 +137,9 @@ func (c *Connection) handleEvent(raw []json.RawMessage) {
 	if IsEphemeral(event.Kind) {
 		c.sendOK(event.ID, true, "")
 		c.relay.broadcast(&event, c)
+		if c.relay.kafka != nil {
+			c.relay.kafka.Publish(context.Background(), &event)
+		}
 		return
 	}
 
@@ -143,6 +148,9 @@ func (c *Connection) handleEvent(raw []json.RawMessage) {
 
 	if accepted && msg != "duplicate: already have this event" {
 		c.relay.broadcast(&event, c)
+		if c.relay.kafka != nil {
+			c.relay.kafka.Publish(context.Background(), &event)
+		}
 	}
 }
 
